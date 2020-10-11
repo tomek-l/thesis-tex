@@ -103,13 +103,56 @@ The remainder of my thesis is structured as follows:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Hardware Design}\label{sec:hardware}
-  
-  \subsection{Overview}
-  Although not crucial
 
-  \subsection{Drone}
+  In this section, I describe the hardware components that make up my system.
+  In section~\ref{sec:hardware:overview} I present a top-level outline of the system as a whole.
+  I describe the sensing payload and the drone in sections~\ref{sec:hardware:payload} and \ref{sec:hardware:drone} respectively, as separate sub-systems.
+
+  \subsection{Overview}\label{sec:hardware:overview}
+
+  \begin{tikzpicture}[outer sep=0.05cm,node distance=0.8cm,]
+    \tikzstyle{bigbox} = [draw=blue!50, thick, fill=gray!10, rounded corners, rectangle]
+    \tikzstyle{box} = [minimum size=0.6cm, rounded corners,rectangle, fill=blue!20]
+    \tikzstyle{arrow} = [thick,->,>=stealth]
+    
+    % Drone
+    \node[box] (pixhawk) {Pixhawk FC};
+    \node[box, below of=pixhawk] (sensors) {Onboard Sensors};
+    \node[box, below of=sensors] (tx) {Telemetry TX};
+    %
+    \begin{pgfonlayer}{background}
+      \node[bigbox, label={Drone}] [fit = (pixhawk) (sensors) (tx)] (dron) {};
+    \end{pgfonlayer}
+    
+    % Payload
+    % \node[box,below=of sensors.west, anchor=west, yshift=-1cm] (jetson) {Jetson Nano};
+    \node[box,right=of pixhawk.east, anchor=west, xshift=2cm] (jetson) {Jetson Nano};
+    \node[box,right of=jetson, xshift=2cm] (ir_cam) {IR Camera};
+    \node[box,below of=ir_cam] (rgb_cam) {RGB Camera};
+    \node[box,below of=rgb_cam] (pms) {PM Sensor};
+    %
+    \begin{pgfonlayer}{background}
+      \node[bigbox, label={Payload}] [fit = (jetson) (rgb_cam) (pms)] (payload) {};
+      
+    \end{pgfonlayer}
+    
+    % \draw [arrow] (payload) -- (dron);
+    \draw [arrow] [thick,<->,>=stealth] (jetson) -- (pixhawk);
+    
+    \draw [arrow] [thick,<-,>=stealth] (jetson) |- (pms);
+    \draw [arrow] [thick,<-,>=stealth] (jetson.south) |- (rgb_cam);
+    \draw [arrow] [thick,<-,>=stealth] (jetson) -- (ir_cam);
+    
+    %
+  \end{tikzpicture}
+    
+
+  \subsection{Drone}\label{sec:hardware:drone}
 
   \subsubsection{Rationale for building custom UAV}
+
+
+  \paragraph{AI Chip}
 
   The primary design consideration in building this system was enabling hardware-accelerated neural network inference on edge.
   There are few notable instances of using AI hardware accelerators in existing commercial drones.
@@ -118,9 +161,17 @@ The remainder of my thesis is structured as follows:
 
   Unfortunately, at the time of writing this thesis, there are no readily available low-cost drones that would provide developers and researchers
   programmatic access to the AI chip. 
+
+  \paragraph{Sensor Integration}
+
+  In order to provide the highest 
+
+  \paragraph{Open Source}
   
   In the sections \ref{sec:sensors} I cover the design of the UAV platform, as well as the Camera-Compute Payload, enabling the system's perception.
 
+  
+  
   \subsubsection{Sensors}\label{sec:sensors}
 
 
@@ -128,8 +179,10 @@ The remainder of my thesis is structured as follows:
 
   % TODO: image of stddev of two sensors
 
-  \subsection{Payload}
-  Talk about the payload 
+  
+  
+  \subsection{Payload}\label{sec:hardware:payload}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -162,15 +215,28 @@ The remainder of my thesis is structured as follows:
 
   \subsection{Model}\label{sec:model}
 
-  \subsection{Training}\label{sec:model}
+  \subsection{Training}\label{sec:training}
     
   \subsection{Quantitative Evaluation}\label{sec:eval}
+
+  \begin{table}[]
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+    \multicolumn{2}{|l|}{Nvidia GTX 1060} & \multicolumn{2}{l|}{Nvidia Jetson Nano} & \multicolumn{2}{l|}{Nvidia Jetson Xavier AGX} \\ \hline
+    baseline          & TensorRT          & baseline           & TensorRT           & baseline              & TensorRT              \\ \hline
+                      &                   &                    &                    &                       &                       \\ \hline
+                      &                   &                    &                    &                       &                       \\ \hline
+    \end{tabular}
+    \caption{Model latency across different devices}
+    \end{table}
 
   \subsection{Qualitative Evaluation}\label{sec:gradcam}
 
 \section{Auxilary Vision Systems}\label{sec:other}
 
   \subsection{Person Detection}
+
+  \subsection{Counting People from Above}
 
   \subsection{Flame Segmentation Model}
 
